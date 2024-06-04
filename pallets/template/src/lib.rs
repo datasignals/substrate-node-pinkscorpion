@@ -67,6 +67,7 @@ pub mod pallet {
 	use super::*;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+	use scale_info::prelude::vec::Vec;
 
 	// The `Pallet` struct serves as a placeholder to implement traits, methods and dispatchables
 	// (`Call`s) in this pallet.
@@ -106,13 +107,10 @@ pub mod pallet {
 	#[pallet::event]
 	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
-		/// A user has successfully set a new value.
-		SomethingStored {
-			/// The new value set.
-			something: u32,
-			/// The account who set the new value.
-			who: T::AccountId,
-		},
+		/// An event indicating a file has been disassembled.
+        FileDisassembled(T::AccountId, Vec<u8>, Vec<u8>, Vec<u8>), // (account, creation_time, file_path, event_key)
+        /// An event indicating a file has been reassembled.
+        FileReassembled(T::AccountId, Vec<u8>, Vec<u8>, Vec<u8>),  // (account, creation_time, file_path, event_key)
 	}
 
 	/// Errors that can be returned by this pallet.
@@ -152,19 +150,12 @@ pub mod pallet {
 		/// error if it isn't. Learn more about origins here: <https://docs.substrate.io/build/origins/>
 		#[pallet::call_index(0)]
 		#[pallet::weight(T::WeightInfo::do_something())]
-		pub fn do_something(origin: OriginFor<T>, something: u32) -> DispatchResult {
-			// Check that the extrinsic was signed and get the signer.
-			let who = ensure_signed(origin)?;
-
-			// Update storage.
-			Something::<T>::put(something);
-
-			// Emit an event.
-			Self::deposit_event(Event::SomethingStored { something, who });
-
-			// Return a successful `DispatchResult`
-			Ok(())
-		}
+		pub fn file_disassembled(origin: OriginFor<T>, creation_time: Vec<u8>, file_path: Vec<u8>, event_key: Vec<u8>) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+            // Emit event for file disassembly
+            Self::deposit_event(Event::FileDisassembled(sender, creation_time, file_path, event_key));
+            Ok(())
+        }
 
 		/// An example dispatchable that may throw a custom error.
 		///
@@ -180,23 +171,13 @@ pub mod pallet {
 		/// - If incrementing the value in storage causes an arithmetic overflow
 		///   ([`Error::StorageOverflow`])
 		#[pallet::call_index(1)]
-		#[pallet::weight(T::WeightInfo::cause_error())]
-		pub fn cause_error(origin: OriginFor<T>) -> DispatchResult {
-			let _who = ensure_signed(origin)?;
-
-			// Read a value from storage.
-			match Something::<T>::get() {
-				// Return an error if the value has not been set.
-				None => Err(Error::<T>::NoneValue.into()),
-				Some(old) => {
-					// Increment the value read from storage. This will cause an error in the event
-					// of overflow.
-					let new = old.checked_add(1).ok_or(Error::<T>::StorageOverflow)?;
-					// Update the value in storage with the incremented result.
-					Something::<T>::put(new);
-					Ok(())
-				},
-			}
-		}
+		//#[pallet::weight(T::WeightInfo::cause_error())]
+		#[pallet::weight(T::DbWeight::get().writes(1))]
+		pub fn file_reassembled(origin: OriginFor<T>, creation_time: Vec<u8>, file_path: Vec<u8>, event_key: Vec<u8>) -> DispatchResult {
+            let sender = ensure_signed(origin)?;
+            // Emit event for file reassembly
+			Self::deposit_event(Event::FileReassembled(sender, creation_time, file_path, event_key));
+            Ok(())
+        }
 	}
 }

@@ -33,6 +33,7 @@ pub use frame_support::{
 	},
 	StorageValue,
 };
+pub use nfs_pallet;
 pub use frame_system::Call as SystemCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
@@ -251,6 +252,11 @@ impl pallet_template::Config for Runtime {
 	type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
 }
 
+impl nfs_pallet::Config for Runtime {
+    type RuntimeEvent = RuntimeEvent;
+}
+
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 #[frame_support::runtime]
 mod runtime {
@@ -292,6 +298,9 @@ mod runtime {
 	// Include the custom logic from the pallet-template in the runtime.
 	#[runtime::pallet_index(7)]
 	pub type TemplateModule = pallet_template;
+
+	#[runtime::pallet_index(8)]
+	pub type NfsPallet = nfs_pallet;
 }
 
 /// The address format for describing accounts.
@@ -342,6 +351,7 @@ mod benches {
 		[pallet_timestamp, Timestamp]
 		[pallet_sudo, Sudo]
 		[pallet_template, TemplateModule]
+		[nfs_pallet, NfsPallet]
 	);
 }
 

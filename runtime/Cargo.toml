@@ -16,6 +16,13 @@ workspace = true
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
+nfs_pallet = { path = "/Users/arifahmad/Rough_Block/substrate-node-template/pallets/nfs_pallet", default-features = false }
+#frame-system = { version = "34.0.0", default-features = false }
+#frame-support = { version = "34.0.0", default-features = false }
+sp-io = { version = "30.0.0", default-features = false }
+#sp-runtime = { version = "37.0.0", default-features = false }
+#sp-externalities = { version = "0.28.0", default-features = false }
+getrandom = { version = "0.2.15", features = ["js"] }
 codec = { package = "parity-scale-codec", version = "3.6.1", default-features = false, features = [
 	"derive",
 ] }
@@ -23,6 +30,8 @@ scale-info = { version = "2.10.0", default-features = false, features = [
 	"derive",
 	"serde",
 ] }
+
+
 
 # frame
 frame-support = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false, features = ["experimental"] }
@@ -37,6 +46,7 @@ pallet-grandpa = { git = "https://github.com/paritytech/polkadot-sdk.git", tag =
 pallet-sudo = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
 pallet-timestamp = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
 pallet-transaction-payment = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
+#pallet-nfs_pallet = { path = "/Users/arifahmad/Rough_Block/substrate-node-template/pallets/nfs_pallet", default-features = false }
 
 # primitives
 sp-api = { git = "https://github.com/paritytech/polkadot-sdk.git", tag = "polkadot-v1.9.0", default-features = false }
@@ -101,6 +111,7 @@ std = [
 	"pallet-timestamp/std",
 	"pallet-transaction-payment-rpc-runtime-api/std",
 	"pallet-transaction-payment/std",
+	"nfs_pallet/std",
 
 	"sp-api/std",
 	"sp-block-builder/std",
@@ -118,6 +129,7 @@ std = [
 	"sp-version/std",
 
 	"substrate-wasm-builder",
+	
 ]
 
 runtime-benchmarks = [
@@ -131,6 +143,7 @@ runtime-benchmarks = [
 	"pallet-template/runtime-benchmarks",
 	"pallet-timestamp/runtime-benchmarks",
 	"sp-runtime/runtime-benchmarks",
+	
 ]
 
 try-runtime = [
@@ -146,6 +159,7 @@ try-runtime = [
 	"pallet-timestamp/try-runtime",
 	"pallet-transaction-payment/try-runtime",
 	"sp-runtime/try-runtime",
+	
 ]
 
 experimental = ["pallet-aura/experimental"]
