@@ -33,7 +33,6 @@ pub use frame_support::{
 	},
 	StorageValue,
 };
-pub use nfs_pallet;
 pub use frame_system::Call as SystemCall;
 pub use pallet_balances::Call as BalancesCall;
 pub use pallet_timestamp::Call as TimestampCall;
@@ -249,59 +248,67 @@ impl pallet_sudo::Config for Runtime {
 /// Configure the pallet-template in pallets/template.
 impl pallet_template::Config for Runtime {
 	type RuntimeEvent = RuntimeEvent;
-	type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
+	//type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
 }
 
-impl nfs_pallet::Config for Runtime {
-    type RuntimeEvent = RuntimeEvent;
-}
+construct_runtime!(
+    pub struct Runtime {
+        System: frame_system,
+		//System: frame_system::{Pallet, Call, Storage, Config, Event<T>, GenesisConfig<T>},
+        Timestamp: pallet_timestamp,
+        Aura: pallet_aura,
+        Grandpa: pallet_grandpa,
+        Balances: pallet_balances,
+        TransactionPayment: pallet_transaction_payment,
+        Sudo: pallet_sudo,
+        //TemplateModule: pallet_template,
+		TemplateModule: pallet_template::{Pallet, Call, Storage, Event<T>}
+    }
+);
 
 
-// Create the runtime by composing the FRAME pallets that were previously configured.
-#[frame_support::runtime]
-mod runtime {
-	#[runtime::runtime]
-	#[runtime::derive(
-		RuntimeCall,
-		RuntimeEvent,
-		RuntimeError,
-		RuntimeOrigin,
-		RuntimeFreezeReason,
-		RuntimeHoldReason,
-		RuntimeSlashReason,
-		RuntimeLockId,
-		RuntimeTask
-	)]
-	pub struct Runtime;
+// // Create the runtime by composing the FRAME pallets that were previously configured.
+// #[frame_support::runtime]
+// mod runtime {
+// 	#[runtime::runtime]
+// 	#[runtime::derive(
+// 		RuntimeCall,
+// 		RuntimeEvent,
+// 		RuntimeError,
+// 		RuntimeOrigin,
+// 		RuntimeFreezeReason,
+// 		RuntimeHoldReason,
+// 		RuntimeSlashReason,
+// 		RuntimeLockId,
+// 		RuntimeTask
+// 	)]
+// 	pub struct Runtime;
 
-	#[runtime::pallet_index(0)]
-	pub type System = frame_system;
+// 	#[runtime::pallet_index(0)]
+// 	pub type System = frame_system;
 
-	#[runtime::pallet_index(1)]
-	pub type Timestamp = pallet_timestamp;
+// 	#[runtime::pallet_index(1)]
+// 	pub type Timestamp = pallet_timestamp;
 
-	#[runtime::pallet_index(2)]
-	pub type Aura = pallet_aura;
+// 	#[runtime::pallet_index(2)]
+// 	pub type Aura = pallet_aura;
 
-	#[runtime::pallet_index(3)]
-	pub type Grandpa = pallet_grandpa;
+// 	#[runtime::pallet_index(3)]
+// 	pub type Grandpa = pallet_grandpa;
 
-	#[runtime::pallet_index(4)]
-	pub type Balances = pallet_balances;
+// 	#[runtime::pallet_index(4)]
+// 	pub type Balances = pallet_balances;
 
-	#[runtime::pallet_index(5)]
-	pub type TransactionPayment = pallet_transaction_payment;
+// 	#[runtime::pallet_index(5)]
+// 	pub type TransactionPayment = pallet_transaction_payment;
 
-	#[runtime::pallet_index(6)]
-	pub type Sudo = pallet_sudo;
+// 	#[runtime::pallet_index(6)]
+// 	pub type Sudo = pallet_sudo;
 
-	// Include the custom logic from the pallet-template in the runtime.
-	#[runtime::pallet_index(7)]
-	pub type TemplateModule = pallet_template;
-
-	#[runtime::pallet_index(8)]
-	pub type NfsPallet = nfs_pallet;
-}
+// 	// Include the custom logic from the pallet-template in the runtime.
+// 	#[runtime::pallet_index(7)]
+// 	pub type TemplateModule = pallet_template;
+// }
 
 /// The address format for describing accounts.
 pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
@@ -351,7 +358,6 @@ mod benches {
 		[pallet_timestamp, Timestamp]
 		[pallet_sudo, Sudo]
 		[pallet_template, TemplateModule]
-		[nfs_pallet, NfsPallet]
 	);
 }
 

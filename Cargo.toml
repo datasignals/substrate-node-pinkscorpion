@@ -9,7 +9,6 @@ homepage = "https://substrate.io"
 members = [
     "node",
     "pallets/template",
-    "pallets/nfs_pallet",
     "runtime",
 ]
 resolver = "2"
@@ -44,4 +43,3 @@ derivable_impls = { level = "allow", priority = 2 }                  # false pos
 stable_sort_primitive = { level = "allow", priority = 2 }            # prefer stable sort
 extra-unused-type-parameters = { level = "allow", priority = 2 }     # stylistic
 default_constructed_unit_structs = { level = "allow", priority = 2 } # stylistic
-
