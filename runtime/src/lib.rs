@@ -41,26 +41,12 @@ use pallet_transaction_payment::{ConstFeeMultiplier, CurrencyAdapter, Multiplier
 pub use sp_runtime::BuildStorage;
 pub use sp_runtime::{Perbill, Permill};
 
-/// Import the template pallet.
-// pub use pallet_template;
-
-/// An index to a block.
+//pub mod types;
 pub type BlockNumber = u32;
-
-/// Alias to 512-bit hash when used in the context of a transaction signature on the chain.
 pub type Signature = MultiSignature;
-
-/// Some way of identifying an account on the chain. We intentionally make it equivalent
-/// to the public key of our transaction signing scheme.
 pub type AccountId = <<Signature as Verify>::Signer as IdentifyAccount>::AccountId;
-
-/// Balance of an account.
 pub type Balance = u128;
-
-/// Index of a transaction in the chain.
 pub type Nonce = u32;
-
-/// A hash of some data used by the chain.
 pub type Hash = sp_core::H256;
 
 /// Opaque types. These are used by the CLI to instantiate machinery that don't need to know
@@ -112,13 +98,9 @@ pub const VERSION: RuntimeVersion = RuntimeVersion {
 /// up by `pallet_aura` to implement `fn slot_duration()`.
 ///
 /// Change this to adjust the block time.
+//pub mod constants;
 pub const MILLISECS_PER_BLOCK: u64 = 6000;
-
-// NOTE: Currently it is not possible to change the slot duration after the chain has started.
-//       Attempting to do so will brick block production.
 pub const SLOT_DURATION: u64 = MILLISECS_PER_BLOCK;
-
-// Time is measured by number of blocks.
 pub const MINUTES: BlockNumber = 60_000 / (MILLISECS_PER_BLOCK as BlockNumber);
 pub const HOURS: BlockNumber = MINUTES * 60;
 pub const DAYS: BlockNumber = HOURS * 24;
@@ -131,6 +113,7 @@ pub fn native_version() -> NativeVersion {
 
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
 
+//pub mod config;
 parameter_types! {
 	pub const BlockHashCount: BlockNumber = 2400;
 	pub const Version: RuntimeVersion = VERSION;
@@ -144,7 +127,6 @@ parameter_types! {
 		::max_with_normal_ratio(5 * 1024 * 1024, NORMAL_DISPATCH_RATIO);
 	pub const SS58Prefix: u8 = 42;
 }
-
 /// The default types are being injected by [`derive_impl`](`frame_support::derive_impl`) from
 /// [`SoloChainDefaultConfig`](`struct@frame_system::config_preludes::SolochainDefaultConfig`),
 /// but overridden as needed.
@@ -251,65 +233,19 @@ impl pallet_template::Config for Runtime {
 	//type WeightInfo = pallet_template::weights::SubstrateWeight<Runtime>;
 }
 
+//pub mod runtime;
 construct_runtime!(
     pub struct Runtime {
         System: frame_system,
-		//System: frame_system::{Pallet, Call, Storage, Config, Event<T>, GenesisConfig<T>},
         Timestamp: pallet_timestamp,
         Aura: pallet_aura,
         Grandpa: pallet_grandpa,
         Balances: pallet_balances,
         TransactionPayment: pallet_transaction_payment,
         Sudo: pallet_sudo,
-        //TemplateModule: pallet_template,
-		TemplateModule: crate::pallet_template::{Pallet, Call, Storage, Event<T>}
+        TemplateModule: crate::pallet_template::{Pallet,Call,Storage,Event<T>}
     }
 );
-
-
-// // Create the runtime by composing the FRAME pallets that were previously configured.
-// #[frame_support::runtime]
-// mod runtime {
-// 	#[runtime::runtime]
-// 	#[runtime::derive(
-// 		RuntimeCall,
-// 		RuntimeEvent,
-// 		RuntimeError,
-// 		RuntimeOrigin,
-// 		RuntimeFreezeReason,
-// 		RuntimeHoldReason,
-// 		RuntimeSlashReason,
-// 		RuntimeLockId,
-// 		RuntimeTask
-// 	)]
-// 	pub struct Runtime;
-
-// 	#[runtime::pallet_index(0)]
-// 	pub type System = frame_system;
-
-// 	#[runtime::pallet_index(1)]
-// 	pub type Timestamp = pallet_timestamp;
-
-// 	#[runtime::pallet_index(2)]
-// 	pub type Aura = pallet_aura;
-
-// 	#[runtime::pallet_index(3)]
-// 	pub type Grandpa = pallet_grandpa;
-
-// 	#[runtime::pallet_index(4)]
-// 	pub type Balances = pallet_balances;
-
-// 	#[runtime::pallet_index(5)]
-// 	pub type TransactionPayment = pallet_transaction_payment;
-
-// 	#[runtime::pallet_index(6)]
-// 	pub type Sudo = pallet_sudo;
-
-// 	// Include the custom logic from the pallet-template in the runtime.
-// 	#[runtime::pallet_index(7)]
-// 	pub type TemplateModule = pallet_template;
-// }
-
 /// The address format for describing accounts.
 pub type Address = sp_runtime::MultiAddress<AccountId, ()>;
 /// Block header type as expected by this runtime.
@@ -602,18 +538,38 @@ impl_runtime_apis! {
 		}
 	}
 }
-
-//pub use pallet_template;
+//pub mod pallets;
 
 #[frame_support::pallet]
 pub mod pallet_template {
-    use super::*;
+	use super::*;
     use frame_support::pallet_prelude::*;
     use frame_system::pallet_prelude::*;
     use scale_info::prelude::vec::Vec;
 
+    #[pallet::event]
+    #[pallet::generate_deposit(pub fn deposit_event)]
+    pub enum Event<T: Config> {
+        FileDisassembled { who: T::AccountId, event: FSEvent },
+        FileReassembled { who: T::AccountId, event: FSEvent },
+		DisassemblyRequested { who: T::AccountId, event: FSEvent },
+    }
+
     #[pallet::pallet]
     pub struct Pallet<T>(_);
+
+    // Define your helper functions here as methods of the Pallet struct
+    impl<T: Config> Pallet<T> {
+        fn fetch_disassembly_requests() -> Vec<Event<T>> {
+            // Fetch requests from storage or off-chain storage
+            vec![]
+        }
+
+        fn process_disassembly_request(request:  Event<T>) -> Result<(), &'static str> {
+            // Process the request
+            Ok(())
+        }
+    }
 
     #[pallet::config]
     pub trait Config: frame_system::Config {
@@ -629,14 +585,7 @@ pub mod pallet_template {
 
     #[pallet::storage]
     #[pallet::getter(fn info)]
-    pub(super) type DisReAssembly<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, FSEvent, OptionQuery>;
-
-    #[pallet::event]
-    #[pallet::generate_deposit(pub(super) fn deposit_event)]
-    pub enum Event<T: Config> {
-        FileDisassembled { who: T::AccountId, event: FSEvent },
-        FileReassembled { who: T::AccountId, event: FSEvent },
-    }
+    pub type DisReAssembly<T: Config> = StorageMap<_, Blake2_128Concat, T::AccountId, FSEvent, OptionQuery>;
 
     #[pallet::error]
     pub enum Error<T> {
@@ -644,6 +593,22 @@ pub mod pallet_template {
         FilePathTooLong,
         EventKeyTooLong,
     }
+
+	/*#[pallet::hooks]
+	impl<T: Config> Hooks<BlockNumberFor<T>> for Pallet<T> {
+		fn offchain_worker(block_number: T::BlockNumber) {
+			// Your offchain worker logic here
+			//log::info!("Offchain Worker running at block number: {:?}", block_number);
+
+			// Example: Process disassembly requests
+			let requests = Self::fetch_disassembly_requests();
+			for request in requests {
+				if let Err(e) = Self::process_disassembly_request(request) {
+					//log::error!("Failed to process disassembly request: {:?}", e);
+				}
+			}
+		}
+	}*/
 
     #[pallet::call]
     impl<T: Config> Pallet<T> {
@@ -682,7 +647,7 @@ pub mod pallet_template {
             <DisReAssembly<T>>::insert(&sender, &event);
 
             Self::deposit_event(Event::<T>::FileDisassembled { who: sender.clone(), event: event.clone() });
-
+		
             Ok(())
         }
 
@@ -724,5 +689,45 @@ pub mod pallet_template {
 
             Ok(())
         }
-    }
+
+		#[pallet::call_index(2)]
+		#[pallet::weight(10_000)]
+		pub fn request_disassembly(
+			origin: OriginFor<T>,
+			creation_time: Vec<u8>,
+			file_path: Vec<u8>,
+			event_key: Vec<u8>,
+		) -> DispatchResult {
+			let who = ensure_signed(origin)?;
+	
+			// Ensure the data sizes are within limits
+			ensure!(creation_time.len() <= 64, Error::<T>::CreationTimeTooLong);
+			ensure!(file_path.len() <= 256, Error::<T>::FilePathTooLong);
+			ensure!(event_key.len() <= 128, Error::<T>::EventKeyTooLong);
+	
+			// Construct the FSEvent
+			let event = FSEvent {
+				creationtime: {
+					let mut arr = [0u8; 64];
+					arr[..creation_time.len()].copy_from_slice(&creation_time);
+					arr
+				},
+				filepath: {
+					let mut arr = [0u8; 256];
+					arr[..file_path.len()].copy_from_slice(&file_path);
+					arr
+				},
+				eventkey: {
+					let mut arr = [0u8; 128];
+					arr[..event_key.len()].copy_from_slice(&event_key);
+					arr
+				},
+			};
+	
+			// Emit an event to log the request
+			Self::deposit_event(Event::DisassemblyRequested { who, event });
+	
+			Ok(())
+		}
+	}
 }
